@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Análisis exploratorio de datos:
 Datos productivos de centros de cultivo de salmónidos 2021
 # Autor:
@@ -8,3 +9,4 @@ drsch@disroot.org
 # Resumen : Problema a explorar
 # Resumen : Datos Originales usados
 # Resumen : Métodos estadísticos utilizados
+
