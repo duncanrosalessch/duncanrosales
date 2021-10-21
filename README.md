@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 # Análisis exploratorio de datos:
 Datos productivos de centros de cultivo de salmónidos 2021
 # Autor:
