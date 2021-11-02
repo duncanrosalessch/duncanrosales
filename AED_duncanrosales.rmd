@@ -1,5 +1,5 @@
 ---
-title: "Análisis exploratorio de datos productivos en centros engorda Contao"
+title: "Análisis exploratorio de datos de fitoplancton encontrado en canales Baker y Martinez, bajo CIMAR Fiordo N°20"
 author: "Duncan Rosales Schulz"
 date: "1/11/2021"
 output: pdf_document
@@ -7,6 +7,7 @@ output: pdf_document
 
 ```{r setup, include=FALSE, warning=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
+#Cargar las librerías asociadas al trabajo de los datos
 library(readxl)
 library(graphics)
 library(psych)
@@ -16,8 +17,75 @@ library(tidyr)
 library(ggplot2)
 ```
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r, warning=FALSE,message=FALSE}
+#Montando la base de datos necesaria para realizar el análisis exploratorio
+dat <- read_excel("BD_FITO_DIATOMEAS.xlsx")
+#Haciendo las respectivas transformaciones a factor
+dat$CANAL <- as.factor(dat$CANAL)
+dat$ESTACIÓN <- as.factor(dat$ESTACIÓN)
+dat$ESPECIE <- as.factor(dat$ESPECIE)
+dat$PROFUNDIDAD <- as.factor(dat$PROFUNDIDAD)
+dat$TIPO <- as.factor(dat$TIPO)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+```{r}
+summary(dat)
+head(dat)
+str(dat)
+```
+
+```{r}
+#Algo necesito hacer con esos valores 0... Además, lo que quiero es que muestre más que abundancia, riqueza por CANAL
+dat %>%
+ggplot(aes(x= CANAL,y=TIPO,fill= CANAL))+
+geom_boxplot()+
+theme(legend.position="none")+
+labs(x="Canal",y="Abundancia (cel/mL)",
+title= "Diferencia ")
+```
+
+```{r}
+ggplot(data=dat, aes(x=PROFUNDIDAD,y=ABUNDANCIA, fill = TIPO)) + geom_histogram()
+```
+
+
+```{r}
+#Me gustaría que este gráfico mostrase, en un boxplot, la diferencia en riqueza entre una profundidad y otra, de los dos canales.  Creo debo crear nuevos elementos para que resulte.
+dat%>% 
+  ggplot(aes(x=PROFUNDIDAD,y=ESPECIE,fill=CANAL))+
+      geom_boxplot()+
+     theme(legend.position="none")+
+     labs(x="Profundidad",y="Riqueza",
+          title="Distribución entre las variables Profundidad vs Riqueza")
+```
+
+
+```{r}
+#La idea acá era mostrar diferencias en los promedios de abundancias... pero tal vez esa no sea la medida de tendencia central más óptima.
+Diatomeas <- dat[dat$TIPO=="DIATOMEAS", ]
+Prome_Diatomeas <- mean(dat$ABUNDANCIA)
+Var_Diatomeas <- var(dat$ABUNDANCIA)
+
+Dinoflagelados <- dat[dat$TIPO=="DINOFLAGELADOS", ]
+Prome_Dinoflagelados <- mean(dat$ABUNDANCIA)
+Var_Dinoflagelados <- var(dat$ABUNDANCIA)
+
+Tabla <- data.frame(Prome_Diatomeas, Var_Peso_Diatomeas,Prome_Dinoflagelados,Var_Dinoflagelados )
+colnames(Tabla) <- c("Abundancia Promedio Diatomeas","Varianza_Diatomeas", 
+                     "Abundancia Promedio Dinoflagelados","Varianza_Dinoflagelados" )
+# Tabla con los datos
+knitr::kable(Tabla,caption ="Medias y varianzas de fitoplancton; diatomeas y dinoflagelados ")
+```
+
+
+
+```{r}
+# Histogramas de las abundancias de fitoplancton, en los canales Baker y Martinez.
+#INCOMPLETO
+dat %>%
+ggplot(aes(x=DIATOMEAS))+
+geom_histogram(binwidth = 30)+
+labs(x="",y='Frecuencia',
+title="Histograma"
+```
+
