@@ -1,0 +1,23 @@
+---
+title: "Análisis exploratorio de datos productivos en centros engorda Contao"
+author: "Duncan Rosales Schulz"
+date: "1/11/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(readxl)
+library(graphics)
+library(psych)
+library(stats)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+```
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
