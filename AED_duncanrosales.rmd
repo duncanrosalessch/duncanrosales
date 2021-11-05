@@ -1,7 +1,7 @@
 ---
 title: "Análisis exploratorio de datos de fitoplancton encontrado en canales Baker y Martinez, bajo CIMAR Fiordo N°20"
 author: "Duncan Rosales Schulz"
-date: "1/11/2021"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
 output: pdf_document
 ---
 
@@ -17,75 +17,57 @@ library(tidyr)
 library(ggplot2)
 ```
 
-```{r, warning=FALSE,message=FALSE}
+```{r}
 #Montando la base de datos necesaria para realizar el análisis exploratorio
 dat <- read_excel("BD_FITO_DIATOMEAS.xlsx")
+#Debido a que al parecer es un real problema tener muchas observaciones en 0, cosa que para usar PRIMER si era muy útil, procederé a borrar aquellos registros que tengan abundancia ">0"
+df2<-subset(dat, ABUNDANCIA!="0")
+df2
+```
+
+```{r, warning=FALSE,message=FALSE}
 #Haciendo las respectivas transformaciones a factor
-dat$CANAL <- as.factor(dat$CANAL)
-dat$ESTACIÓN <- as.factor(dat$ESTACIÓN)
-dat$ESPECIE <- as.factor(dat$ESPECIE)
-dat$PROFUNDIDAD <- as.factor(dat$PROFUNDIDAD)
-dat$TIPO <- as.factor(dat$TIPO)
+df2$CANAL <- as.factor(df2$CANAL)
+df2$ESTACIÓN <- as.factor(df2$ESTACIÓN)
+df2$ESPECIE <- as.factor(df2$ESPECIE)
+df2$PROFUNDIDAD <- as.factor(df2$PROFUNDIDAD)
+df2$TIPO <- as.factor(df2$TIPO)
 ```
 
 ```{r}
-summary(dat)
-head(dat)
-str(dat)
+summary(df2)
+head(df2)
+str(df2)
 ```
 
 ```{r}
-#Algo necesito hacer con esos valores 0... Además, lo que quiero es que muestre más que abundancia, riqueza por CANAL
-dat %>%
-ggplot(aes(x= CANAL,y=TIPO,fill= CANAL))+
-geom_boxplot()+
-theme(legend.position="none")+
-labs(x="Canal",y="Abundancia (cel/mL)",
-title= "Diferencia ")
+#Aquí intento realizar un histograma
+#ggplot(df2, aes(x= 'ABUNDANCIA', color=TIPO))+
+#geom_histogram()+facet_wrap(~ CANAL)
 ```
 
 ```{r}
-ggplot(data=dat, aes(x=PROFUNDIDAD,y=ABUNDANCIA, fill = TIPO)) + geom_histogram()
+#Sale un poco mejor como gráfico de barras
+ggplot(df2, aes(x= 'TIPO', y= 'ABUNDANCIA', fill=TIPO))+
+geom_col()+facet_wrap(~ CANAL)
 ```
 
-
 ```{r}
-#Me gustaría que este gráfico mostrase, en un boxplot, la diferencia en riqueza entre una profundidad y otra, de los dos canales.  Creo debo crear nuevos elementos para que resulte.
-dat%>% 
-  ggplot(aes(x=PROFUNDIDAD,y=ESPECIE,fill=CANAL))+
-      geom_boxplot()+
-     theme(legend.position="none")+
-     labs(x="Profundidad",y="Riqueza",
-          title="Distribución entre las variables Profundidad vs Riqueza")
+#Acá, me gustaría poder sacar tablas de cada grupo
+T_abu_DIATO <- df2 %>% filter(TIPO=="DIATOMEAS") %>% summarise(mean = mean(ABUNDANCIA), sd = sd(ABUNDANCIA), max(ABUNDANCIA), min (ABUNDANCIA))
+
+knitr::kable(T_abu_DIATO, caption = "Tabla 1. Resumen de la abundancia de diatomeas")
+
+T_abu_DINO <- df2 %>% filter(TIPO=="DINOFLAGELADOS") %>% summarise(mean = mean(ABUNDANCIA), sd = sd(ABUNDANCIA), max(ABUNDANCIA), min (ABUNDANCIA))
+
+knitr::kable(T_abu_DINO, caption = "Tabla 2. Resumen de la abundancia de dinoflagelados")
 ```
 
 
 ```{r}
-#La idea acá era mostrar diferencias en los promedios de abundancias... pero tal vez esa no sea la medida de tendencia central más óptima.
-Diatomeas <- dat[dat$TIPO=="DIATOMEAS", ]
-Prome_Diatomeas <- mean(dat$ABUNDANCIA)
-Var_Diatomeas <- var(dat$ABUNDANCIA)
+Tabla_abu <- df2 %>% group_by(CANAL,PROFUNDIDAD,TIPO) %>% summarise(mean = mean(ABUNDANCIA), sd = sd(ABUNDANCIA), n=n())
 
-Dinoflagelados <- dat[dat$TIPO=="DINOFLAGELADOS", ]
-Prome_Dinoflagelados <- mean(dat$ABUNDANCIA)
-Var_Dinoflagelados <- var(dat$ABUNDANCIA)
-
-Tabla <- data.frame(Prome_Diatomeas, Var_Peso_Diatomeas,Prome_Dinoflagelados,Var_Dinoflagelados )
-colnames(Tabla) <- c("Abundancia Promedio Diatomeas","Varianza_Diatomeas", 
-                     "Abundancia Promedio Dinoflagelados","Varianza_Dinoflagelados" )
-# Tabla con los datos
-knitr::kable(Tabla,caption ="Medias y varianzas de fitoplancton; diatomeas y dinoflagelados ")
+knitr::kable(Tabla_abu, caption = "Tabla 1. Resumen de la abundancia de fitoplancton, por canal y profundidad")
 ```
 
-
-
-```{r}
-# Histogramas de las abundancias de fitoplancton, en los canales Baker y Martinez.
-#INCOMPLETO
-dat %>%
-ggplot(aes(x=DIATOMEAS))+
-geom_histogram(binwidth = 30)+
-labs(x="",y='Frecuencia',
-title="Histograma"
-```
 
