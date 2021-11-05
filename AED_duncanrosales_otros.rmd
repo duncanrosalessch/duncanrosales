@@ -1,0 +1,69 @@
+---
+title: "Análisis exploratorio de datos de fitoplancton encontrado en canales Baker y Martinez, bajo CIMAR Fiordo N°20"
+author: "Duncan Rosales Schulz"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+#Cargar las librerías asociadas al trabajo de los datos
+library(readxl)
+library(graphics)
+library(psych)
+library(stats)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+```
+
+```{r}
+#Montando la base de datos necesaria para realizar el análisis exploratorio
+dat <- read_excel("BD_FITO_DIATOMEAS.xlsx")
+#Debido a que al parecer es un real problema tener muchas observaciones en 0, cosa que para usar PRIMER si era muy útil, procederé a borrar aquellos registros que tengan abundancia ">0"
+df2<-subset(dat, ABUNDANCIA!="0")
+df2
+```
+
+```{r, warning=FALSE,message=FALSE}
+#Haciendo las respectivas transformaciones a factor
+df2$CANAL <- as.factor(df2$CANAL)
+df2$ESTACIÓN <- as.factor(df2$ESTACIÓN)
+df2$ESPECIE <- as.factor(df2$ESPECIE)
+df2$PROFUNDIDAD <- as.factor(df2$PROFUNDIDAD)
+df2$TIPO <- as.factor(df2$TIPO)
+```
+
+```{r}
+summary(df2)
+head(df2)
+str(df2)
+```
+```{r}
+#Además, lo que quiero es que muestre más que abundancia, riqueza por CANAL
+df2%>%
+ggplot(aes(x= CANAL,y=TIPO,fill= CANAL))+
+geom_boxplot()+
+theme(legend.position="none")+
+labs(x="Canal",y="Abundancia (cel/mL)",
+title= "Diferencia ")
+```
+
+```{r}
+#Me gustaría que este gráfico mostrase, en un boxplot, la diferencia en riqueza entre una profundidad y otra, de los dos canales.  Creo debo crear nuevos elementos para que resulte.
+df2%>% 
+  ggplot(aes(x=PROFUNDIDAD,y=ESPECIE,fill=CANAL))+
+      geom_boxplot()+
+     theme(legend.position="none")+
+     labs(x="Profundidad",y="Riqueza",
+          title="Distribución entre las variables Profundidad vs Riqueza")
+```
+
+
+```{r}
+Tabla_abu <- df2 %>% group_by(CANAL,PROFUNDIDAD,TIPO) %>% summarise(mean = mean(ABUNDANCIA), sd = sd(ABUNDANCIA), n=n())
+
+knitr::kable(Tabla_abu, caption = "Tabla 1. Resumen de la abundancia de fitoplancton, por canal y profundidad")
+```
+
+
