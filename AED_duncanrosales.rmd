@@ -17,6 +17,8 @@ library(tidyr)
 library(ggplot2)
 ```
 
+#**CONSIDERACIONES INICIALES**
+
 ```{r}
 #Montando la base de datos necesaria para realizar el análisis exploratorio
 dat <- read_excel("BD_FITO_DIATOMEAS.xlsx")
@@ -24,6 +26,12 @@ dat <- read_excel("BD_FITO_DIATOMEAS.xlsx")
 df2<-subset(dat, ABUNDANCIA!="0")
 df2
 ```
+
+#**Variables cuantitativas y factores**
+
+La variable cuantitativa, en este estudio, se trató de una cuantitativa de tipo discreta: ABUNDANCIA.
+
+Los factores, que son varios, son los siguientes: ESPECIE, TIPO, PROFUNDIDAD, CANAL, ESTACION.
 
 ```{r, warning=FALSE,message=FALSE}
 #Haciendo las respectivas transformaciones a factor
@@ -41,10 +49,29 @@ str(df2)
 ```
 
 ```{r}
-#Aquí intento realizar un histograma
-#ggplot(df2, aes(x= 'ABUNDANCIA', color=TIPO))+
-#geom_histogram()+facet_wrap(~ CANAL)
+#Averiguar si los datos se encuentran balanceados, o no
+
 ```
+#**HISTOGRAMA**
+
+Como primera aproximación, se realizó un histograma de la distribución de frecuencia, de la variable ABUNDANCIA.
+
+```{r}
+hist(df2$ABUNDANCIA, main= "Histograma", xlab= "Abundancia", ylab= "Frecuencia", ylim= c(0,1000),col="yellow")
+```
+
+
+Se decidió mostrar la distribución de frecuencia de la variable ABUNDANCIA, separada entre DIATOMEAS y DINOFLAGELADOS.
+
+```{r}
+#Aquí realizo un histograma
+Diatomeas <- df2 %>% filter(TIPO=="DIATOMEAS")
+Dinoflagelados <- df2 %>% filter(TIPO=="DINOFLAGELADOS")
+par(mfrow = c(1,2))
+hist(Diatomeas$ABUNDANCIA, main= "Hist Diatomeas", xlab= "Abundancia", ylab = "Frecuencia", ylim= c(0,800),col="cyan")
+hist(Dinoflagelados$ABUNDANCIA, main= "Hist Dinoflagelados", xlab= "Abundancia", ylab= "Frecuencia", ylim= c(0,350),col="green")
+```
+En el siguiente gráfico, intento hacer "hablar" los datos, esta vez asociando CANAL y ABUNDANCIA.
 
 ```{r}
 #Sale un poco mejor como gráfico de barras
