@@ -99,6 +99,45 @@ df2%>%
      theme(legend.position="none")+
      labs(x="Estación",y="Abundancia",title="Relación ABUNDANCIA y ESTACIÓN")
 ```
+#**TRANSFORMACIÓN
+
+A continuación, se transforman los datos ABUNDANCIA; evalúa balance datos, generación histograma, boxplot de lo ya generado
+
+```{r}
+df2$ABUNDANCIA_LOG10<- log10(df2$ABUNDANCIA)
+```
+
+
+```{r}
+table(df2$ABUNDANCIA_LOG10)
+
+hist(df2$ABUNDANCIA_LOG10, main= "Histograma", xlab= "log10(Abundancia)", ylab= "Frecuencia", ylim= c(0,1000),col="yellow")
+
+df2%>% 
+  ggplot(aes(x=CANAL,y=ABUNDANCIA_LOG10))+
+      geom_boxplot()+
+     theme(legend.position="none")+
+     labs(x="Canal",y="Abundancia",title="Relación ABUNDANCIA y CANAL")
+
+df2%>% 
+  ggplot(aes(x=PROFUNDIDAD,y=ABUNDANCIA_LOG10))+
+      geom_boxplot()+
+     theme(legend.position="none")+
+     labs(x="Profundidad",y="Abundancia",title="Relación ABUNDANCIA y PROFUNDIDAD")
+
+df2%>% 
+  ggplot(aes(x=ESTACIÓN,y=ABUNDANCIA))+
+      geom_boxplot()+
+     theme(legend.position="none")+
+     labs(x="Estación",y="Abundancia",title="Relación ABUNDANCIA y ESTACIÓN")
+```
+
+```{r}
+
+```
+
+
+
 #**OTROS**
 
 A continuación, algunos análisis adicionales que estoy pensando en hacer, pero no considerar todavía como finales.
