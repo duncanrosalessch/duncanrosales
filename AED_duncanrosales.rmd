@@ -47,11 +47,15 @@ summary(df2)
 head(df2)
 str(df2)
 ```
+**BALANCE DE DATOS Y VERIFICACIÓN DE DATOS**
+
+Tabla de frecuencia sobre factores de clasificacion con función table(), sobre la variable ABUNDANCIA.
 
 ```{r}
-#Averiguar si los datos se encuentran balanceados, o no
-
+#Averiguar si los datos se encuentran balanceados, y si cuentan con .
+table(df2$ABUNDANCIA)
 ```
+
 #**HISTOGRAMA**
 
 Como primera aproximación, se realizó un histograma de la distribución de frecuencia, de la variable ABUNDANCIA.
@@ -71,10 +75,36 @@ par(mfrow = c(1,2))
 hist(Diatomeas$ABUNDANCIA, main= "Hist Diatomeas", xlab= "Abundancia", ylab = "Frecuencia", ylim= c(0,800),col="cyan")
 hist(Dinoflagelados$ABUNDANCIA, main= "Hist Dinoflagelados", xlab= "Abundancia", ylab= "Frecuencia", ylim= c(0,350),col="green")
 ```
-En el siguiente gráfico, intento hacer "hablar" los datos, esta vez asociando CANAL y ABUNDANCIA.
+
+#**RELACIÓN ENTRE VARIABLES Y FACTORES**
+
+Se realizaron gráficos boxplot entre ABUNDANCIA, variable respuesta, y los factores o variables regresoras.
 
 ```{r}
-#Sale un poco mejor como gráfico de barras
+df2%>% 
+  ggplot(aes(x=CANAL,y=ABUNDANCIA))+
+      geom_boxplot()+
+     theme(legend.position="none")+
+     labs(x="Canal",y="Abundancia",title="Relación ABUNDANCIA y CANAL")
+
+df2%>% 
+  ggplot(aes(x=PROFUNDIDAD,y=ABUNDANCIA))+
+      geom_boxplot()+
+     theme(legend.position="none")+
+     labs(x="Profundidad",y="Abundancia",title="Relación ABUNDANCIA y PROFUNDIDAD")
+
+df2%>% 
+  ggplot(aes(x=ESTACIÓN,y=ABUNDANCIA))+
+      geom_boxplot()+
+     theme(legend.position="none")+
+     labs(x="Estación",y="Abundancia",title="Relación ABUNDANCIA y ESTACIÓN")
+```
+#**OTROS**
+
+A continuación, algunos análisis adicionales que estoy pensando en hacer, pero no considerar todavía como finales.
+
+```{r}
+#ABUNDANCIA + CANAL
 ggplot(df2, aes(x= 'TIPO', y= 'ABUNDANCIA', fill=TIPO))+
 geom_col()+facet_wrap(~ CANAL)
 ```
