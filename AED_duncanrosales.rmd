@@ -99,7 +99,7 @@ df2%>%
      theme(legend.position="none")+
      labs(x="Estación",y="Abundancia",title="Relación ABUNDANCIA y ESTACIÓN")
 ```
-#**TRANSFORMACIÓN
+#**TRANSFORMACIÓN**
 
 A continuación, se transforman los datos ABUNDANCIA; evalúa balance datos, generación histograma, boxplot de lo ya generado
 
@@ -110,9 +110,13 @@ df2$ABUNDANCIA_LOG10<- log10(df2$ABUNDANCIA)
 
 ```{r}
 table(df2$ABUNDANCIA_LOG10)
+```
 
+```{r}
 hist(df2$ABUNDANCIA_LOG10, main= "Histograma", xlab= "log10(Abundancia)", ylab= "Frecuencia", ylim= c(0,1000),col="yellow")
+```
 
+```{r}
 df2%>% 
   ggplot(aes(x=CANAL,y=ABUNDANCIA_LOG10))+
       geom_boxplot()+
@@ -126,44 +130,60 @@ df2%>%
      labs(x="Profundidad",y="Abundancia",title="Relación ABUNDANCIA y PROFUNDIDAD")
 
 df2%>% 
-  ggplot(aes(x=ESTACIÓN,y=ABUNDANCIA))+
+  ggplot(aes(x=ESTACIÓN,y=ABUNDANCIA_LOG10))+
       geom_boxplot()+
      theme(legend.position="none")+
      labs(x="Estación",y="Abundancia",title="Relación ABUNDANCIA y ESTACIÓN")
 ```
 
-```{r}
-
-```
 
 
 
-#**OTROS**
+#**DÓCIMA DE HIPOTESIS**
 
-A continuación, algunos análisis adicionales que estoy pensando en hacer, pero no considerar todavía como finales.
+Podría existir una asociación entre la variable respuesta ABUNDANCIA, y el factor ESTACION.
+Para ello, se presenta la siguiente H0 e H1:
 
-```{r}
-#ABUNDANCIA + CANAL
-ggplot(df2, aes(x= 'TIPO', y= 'ABUNDANCIA', fill=TIPO))+
-geom_col()+facet_wrap(~ CANAL)
-```
+**H~0~**: $$ \mu_{A_(10)} \cap \mu_{A_(11)} \cap \mu_{A_(12)} \cap \mu_{A_(14)} \cap \mu_{A_(5)} \cap \mu_{A_(5p)} \cap \mu_{A_(6)} 
+\cap \mu_{A_(7)} \cap \mu_{A_(8)} \cap \mu_{A_(9)} \cap \mu_{A_(96)} \cap \mu_{A_(97)} \cap \mu_{A_(98)}= \emptyset $$
 
-```{r}
-#Acá, me gustaría poder sacar tablas de cada grupo
-T_abu_DIATO <- df2 %>% filter(TIPO=="DIATOMEAS") %>% summarise(mean = mean(ABUNDANCIA), sd = sd(ABUNDANCIA), max(ABUNDANCIA), min (ABUNDANCIA))
+**H~1~**: $$ \mu_{A_(10)} \cap \mu_{A_(11)} \cap \mu_{A_(12)} \cap \mu_{A_(14)} \cap \mu_{A_(5)} \cap \mu_{A_(5p)} \cap \mu_{A_(6)} 
+\cap \mu_{A_(7)} \cap \mu_{A_(8)} \cap \mu_{A_(9)} \cap \mu_{A_(96)} \cap \mu_{A_(97)} \cap \mu_{A_(98)} \ne \emptyset $$
 
-knitr::kable(T_abu_DIATO, caption = "Tabla 1. Resumen de la abundancia de diatomeas")
+#**ESTADÍSTICA PARAMÉTRICA**
 
-T_abu_DINO <- df2 %>% filter(TIPO=="DINOFLAGELADOS") %>% summarise(mean = mean(ABUNDANCIA), sd = sd(ABUNDANCIA), max(ABUNDANCIA), min (ABUNDANCIA))
-
-knitr::kable(T_abu_DINO, caption = "Tabla 2. Resumen de la abundancia de dinoflagelados")
-```
-
+Se realizan pruebas para establecer si los datos de ABUNDANCIA cumplen con los supuestos de normalidad, para analizar con estadística paramétrica. Se evaluó independencia, homogeneidad de las varianzas, normalidad, usando un modelo lineal.
 
 ```{r}
-Tabla_abu <- df2 %>% group_by(CANAL,PROFUNDIDAD,TIPO) %>% summarise(mean = mean(ABUNDANCIA), sd = sd(ABUNDANCIA), n=n())
-
-knitr::kable(Tabla_abu, caption = "Tabla 1. Resumen de la abundancia de fitoplancton, por canal y profundidad")
+lm.aov <- lm(ABUNDANCIA_LOG10 ~ PROFUNDIDAD, data = df2)
+aov(lm.aov)
 ```
 
+```{r}
+plot(lm.aov$residuals, pch=20, col = "blue")
+```
 
+```{r}
+plot(lm.aov, 1, pch=20, col = "blue")
+```
+
+```{r}
+plot(lm.aov, 2, pch=20, col = "blue")
+
+aov_residuals <- residuals(object = lm.aov)
+hist(x= aov_residuals, main = "Histograma de residuales")
+
+shapiro.test(x= aov_residuals)
+```
+
+Interpretando los gráficos logrados, y el test de normalidad de Shapiro-Wilk, con un p-value < 2.2e-16, se establece que los datos estandarizados, no cumplen con los supuestos de la estadística paramétrica, por lo que habría de usarse estadística no paramétrica para evaluarles.
+
+#REGRESIÓN LINEAL MIXTA
+
+```{r}
+mod.1 <- lm(ABUNDANCIA_LOG10 ~ ESTACIÓN + PROFUNDIDAD + ESTACIÓN:PROFUNDIDAD, data = df2)
+
+pander::pander(summary(mod.1), caption = "Modelo de efectos fijos con interacción, de los datos df2, transformados log10(ABUNDANCIA)")
+```
+
+Con un r^2 de 0.155, se puede establecer que no existe relación estadísticamente significativa entre las relaciones establecidas en el modelo de regresión lineal mixta.
